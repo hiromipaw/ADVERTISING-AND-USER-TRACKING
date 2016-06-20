@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+
+		<title>On advertising and user tracking on the web. How third party http requests tracks user browsing patterns.</title>
+
+		<meta name="description" content="You never surf alone. Ubiquitous tracking of users’ browsing habits.">
+		<meta name="author" content="Silvia Puglisi">
+
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+
+		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/theme/white.css" id="theme">
+
+		<!-- Code syntax highlighting -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<!-- Printing and PDF exports -->
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+
+		<!--[if lt IE 9]>
+		<script src="lib/js/html5shiv.js"></script>
+		<![endif]-->
+	</head>
+
+	<body>
+
+		<div class="reveal">
+
+			<!-- Any section element inside of this container is displayed as a slide -->
+			<div class="slides">
+				<section>
+					<h4>On advertising and user tracking on the web. How third party http requests tracks user browsing patterns.</h4>
+					<p>
+						<small>Silvia Puglisi, David Rebollo-Monedero and Jordi Forné</small>
+					</p>
+					<p>
+						<small>Department of Telematics Engineering</small>
+						<br/>
+						<small>Universitat Politecnica de Catalunya</small>
+					</p>
+					<img data-src="./images/2000px-Logo_UPC.svg.png" style="width:200px; border:none; -webkit-box-shadow: none; -moz-box-shadow: none; box-shadow: none;">
+					<p><small>Med Hoc Net 2016</small></p>
+				</section>
+
+				<section style="text-align: left;">
+					<h2>Agenda</h2>
+					<ul>
+						<li>Background</li>
+						<li>Contribution</li>
+						<li>Modelling the user's footprint</li>
+						<li>Third party requests on web pages</li>
+						<li>A metric of similarity</li>
+						<li>Experimental methodology and results</li>
+						<li>Conclusions</li>
+					</ul>
+				</section>
+
+				<section style="text-align: left;">
+					<h2>Background</h2>
+					<p>
+						When users surf the web a network of personalisation services tracks their preferences by following their browsing habits.
+					</p>
+
+					<p>
+						 These services combine information from different sources:
+					</p>
+					<ul>
+						<li>profiles and accounts that users create, </li>
+						<li>browser cookies,</li>
+						<li>device fingerprinting and so on.</li>
+					</ul>
+				</section>
+
+				<section style="text-align: left;">
+					<p>Online profiling often means collecting enough features to distinguish an individual among a group of candidates.</p>
+
+					<p>Knowing certain facts about an individual allows the add network (or an attacker) to verify assumptions and make predictions.</p>
+				</section>
+
+				<section style="text-align: left;">
+					<h2>Contributions</h2>
+					<ol>
+						<li>An analysis of how tracking happens on the web based on real browsing patterns,</li>
+						<li>A model of the user online footprint,</li>
+						<li>A measure of how each website affects the advertising returned from advertising services,</li>
+						<li>A measure of connectivity of malicious trackers across different websites.</li>
+					</ol>
+				</section>
+
+				<section style="text-align: left;">
+					<h2>Modelling the user’s footprint</h2>
+					<p>
+						We model the user’s activity as series of events belonging to a certain identity.
+					</p>
+					<p>
+						Each event is a document containing different information.
+					</p>
+					<p>
+						Each document can be seen as a hypermedia document i.e. an object possibly containing graphics, audio, video, plain text and hyperlinks.
+					</p>
+					<p>
+						We call the hyperlinks selectors and we use these to build the connections between documents.
+					</p>
+				</section>
+
+				<section>
+					<img data-src="./images/hyperme.png" style="width:700px; border:none; -webkit-box-shadow: none; -moz-box-shadow: none; box-shadow: none;">
+
+				</section>
+
+				<section style="text-align: left;">
+					<p>
+						We aggregate keywords each time the user creates a new event by visiting a different url.
+					</p>
+					<p>These keywords constitute the user profile of interests.</p>
+					<div style="text-align: center;">
+						<img data-src="./images/abs-profile.png" style="width:500px; border:none; -webkit-box-shadow: none; -moz-box-shadow: none; box-shadow: none;">
+					</div>
+				</section>
+
+				<section style="text-align: left;">
+					<p>
+						With this model we assume that a particular category is weighted according to the number of times this has been counted in the user profile.
+					</p>
+					<p>
+						We define the profile of a user um as the Probability Mass Function:
+					</p>
+					<img data-src="./images/pmf.png" style="width:400px; border:none; -webkit-box-shadow: none; -moz-box-shadow: none; box-shadow: none;">
+					<p>
+						A histogram of relative frequencies of tags across the set of tag categories T.
+					</p>
+				</section>
+
+				<section style="text-align: left;">
+					<p>
+						The profile of an ad is defined as the PMF:
+					</p>
+					<img data-src="./images/ads.png" style="width:400px; border:none; -webkit-box-shadow: none; -moz-box-shadow: none; box-shadow: none;">
+					<p>
+						Where q_{n,l} is the percentage of tags belonging to the category l which have been assigned to this specific advertising item.
+					</p>
+
+				</section>
+
+				<section style="text-align: left;">
+					<h2>Third party requests on web pages</h2>
+					<p>
+						When a user visits a web page, the browser sends an http request to the server to request a representation of the resource described through the url.
+					</p>
+
+					<p>
+						The html document contains a number of links to other resources, such as JavaScript code, CSS, videos, audios or images. Some of these can be stored on the same domain as the requested page, some may be requested to a third party service.
+					</p>
+				</section>
+
+				<section style="text-align: left;">
+					<div style="text-align: center;">
+						<img data-src="./images/tracker-request.png" style="width:800px; border:none; -webkit-box-shadow: none; -moz-box-shadow: none; box-shadow: none;">
+					</div>
+					<p>
+						Trackers on web pages make third-party http requests to advertising services. These return ads content tailored to the user web history or expressed preferences.
+					</p>
+				</section>
+
+				<section style="text-align: left;">
+					<div style="text-align: center;">
+						<img data-src="./images/advertising-loop.png" style="width:800px; border:none; -webkit-box-shadow: none; -moz-box-shadow: none; box-shadow: none;">
+					</div>
+					<p>
+						Advertising services work in a feedback loop. Services record users' profiles and adapt the returned advertising.
+					</p>
+				</section>
+
+				<section style="text-align: left;">
+					<h2>A metric of similarity</h2>
+					<p>We consider the third party advertising network to operate like a recommendation system suggesting products or services based on the users' preferences.</p>
+					<p>We assume that the ad server suggest advertising based on a measure of similarity.</p>
+				</section>
+
+				<section style="text-align: left;">
+					<p>We use the 1 − norm and the 2 - norm between the user and the advertisting profile as a measurement of how the advertising network is tracking the user profile:</p>
+					<img data-src="./images/1-norm.png" style="width:440px; border:none; -webkit-box-shadow: none; -moz-box-shadow: none; box-shadow: none;">
+					<br />
+					<img data-src="./images/2-norm.png" style="width:500px; border:none; -webkit-box-shadow: none; -moz-box-shadow: none; box-shadow: none;">
+
+				</section>
+
+				<section style="text-align: left;">
+					<h2>Experimental methodology</h2>
+					<div style="text-align: center;">
+						<img data-src="./images/methodology.png" style="width:800px; border:none; -webkit-box-shadow: none; -moz-box-shadow: none; box-shadow: none;">
+					</div>
+				</section>
+
+				<section style="text-align: left;">
+					<h2>Why we crawled twitter feeds</h2>
+					<blockquote cite="https://blog.twitter.com/2014/introducing-the-website-tag-for-remarketing" style="text-align: center;">
+						<img data-src="./images/websitetag_remarketing.png" style="width:350px; border:none; -webkit-box-shadow: none; -moz-box-shadow: none; box-shadow: none;">
+					</blockquote>
+					<p><small><q cite="https://blog.twitter.com/2014/introducing-the-website-tag-for-remarketing">
+					&ldquo;https://blog.twitter.com/2014/introducing-the-website-tag-for-remarketing&rdquo;</q></small></p>
+				</section>
+
+				<section style="text-align: left;">
+					<h2>Experimental Results</h2>
+					<div style="text-align: center;">
+						<img data-src="./images/users-1-norm.png" style="width:600px; border:none; -webkit-box-shadow: none; -moz-box-shadow: none; box-shadow: none;">
+						<img data-src="./images/1-norm-user.png" style="width:200px; border:none; -webkit-box-shadow: none; -moz-box-shadow: none; box-shadow: none;">
+					</div>
+				</section>
+
+				<section style="text-align: left;">
+					<h2>Experimental Results</h2>
+					<div style="text-align: center;">
+						<img data-src="./images/user.png" style="width:600px; border:none; -webkit-box-shadow: none; -moz-box-shadow: none; box-shadow: none;">
+					</div>
+				</section>
+
+				<section style="text-align: left;">
+					<h2>Experimental Results</h2>
+					<div style="text-align: center;">
+						<img data-src="./images/pops.png" style="width:600px; border:none; -webkit-box-shadow: none; -moz-box-shadow: none; box-shadow: none;">
+					</div>
+				</section>
+
+				<section style="text-align: left;">
+					<h2>Experimental Results</h2>
+					<div style="text-align: center;">
+						<img data-src="./images/pops2.png" style="width:600px; border:none; -webkit-box-shadow: none; -moz-box-shadow: none; box-shadow: none;">
+					</div>
+				</section>
+
+				<section style="text-align: left;">
+					<h2>Conclusions</h2>
+					<p>
+						Web tracking happens very quickly in a few subsequent visits to websites in a large advertising network.
+					</p>
+					<p>
+						By exploiting links between pages and trackers we are able to capture both connections between entities as weel as individual events, features and metrics.
+					</p>
+					<p>
+
+					</p>
+				</section>
+
+				<section style="text-align: left;">
+					<h2>Future development</h2>
+					<p>
+						We would like to introduce a full set of metrics to measure the distance between the advertising and the user's profile:
+					</p>
+					<ul>
+						<li>2-norm,</li>
+						<li>KL-Divergence between the advertising profile and the observed user profile,</li>
+						<li>Different metrics regarding trackers and their network structure.</li>
+					</ul>
+				</section>
+				<section style="text-align: left;">
+					<p>
+						We are interested in measuring how social networks sharing buttons and/or commenting services, included on websites, are able to track users even when these have not signed in with their account.
+					</p>
+					<p>
+						We are interested to measure how Privacy Enhancing Techniques affect advertising networks.
+					</p>
+				</section>
+
+				<section style="text-align: left;">
+					<h2>Thank you.</h2>
+					<p><small><em>
+						"I do not want to live in a world where everything I do and say is recorded. That is not something I am willing to support or live under."
+					</em></small></p>
+					<p><small><em>Edward Snowden</em></small></p>
+				</section>
+
+			</div>
+
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.js"></script>
+
+		<script>
+
+			// Full list of configuration options available at:
+			// https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				controls: true,
+				progress: true,
+				history: true,
+				center: true,
+				slideNumber: true,
+				keyboard: true,
+				transition: 'concave', // none/fade/slide/convex/concave/zoom
+
+				// Optional reveal.js plugins
+				dependencies: [
+					{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/highlight/highlight.js', async: true, condition: function() { return !!document.querySelector( 'pre code' ); }, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: 'plugin/zoom-js/zoom.js', async: true },
+					{ src: 'plugin/notes/notes.js', async: true }
+				]
+			});
+
+		</script>
+
+	</body>
+</html>
